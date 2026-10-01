@@ -1,0 +1,89 @@
+
+
+# Data Engineering Principles
+
+1. Validate data as early as possibleCatch invalid, malformed, or unexpected data close to the point where it enters your system.
+2. Never blindly trust incoming dataAPIs, files, databases, users, and third-party systems can all produce incorrect or unexpected data.
+3. Define data contracts and schemasClearly define what data should look like: columns, data types, required fields, allowed values, relationships, etc.
+4. Make pipelines idempotentRunning the same pipeline twice should not unintentionally create duplicate or incorrect results.
+5. Design for failureNetworks fail, APIs timeout, files arrive late, databases become unavailable. Assume failures will happen.
+6. Make pipelines observableYou should be able to answer: Did it run? Did it succeed? How much data arrived? What failed? How long did it take?
+7. Monitor data quality, not just pipeline executionA pipeline can technically succeed while producing bad data.
+8. Keep raw data whenever practicalPreserve the original source data so you can reproduce, audit, or reprocess transformations.
+9. Separate ingestion from transformationDon't tightly couple getting the data with transforming the data. This makes debugging and reprocessing easier.
+10. Prefer incremental processing over full reloadsDon't process 10 TB every day if only 50 GB changed.
+11. Process only what changedUse timestamps, CDC, offsets, watermarks, partition information, or other mechanisms to identify new/changed data.
+12. Design for late-arriving dataDon't assume data always arrives in chronological order.
+13. Handle duplicates explicitlyKnow whether duplicates are valid business events or ingestion problems, and design accordingly.
+14. Preserve lineageYou should be able to trace:Where did this data come from? → What transformations happened? → Where did it go?
+15. Make transformations reproducibleGiven the same input and transformation logic, you should be able to reproduce the output.
+16. Separate business logic from infrastructure logicKeep what the business wants calculated separate from how/where the pipeline runs.
+17. Design for scalability, but don't over-engineer prematurelyBuild for realistic growth rather than introducing Spark/Kafka/Kubernetes when a simple solution is sufficient.
+18. Optimize data movement, not just computationMoving data across networks, databases, regions, or storage layers can be more expensive than processing it.
+19. Push computation closer to the data when appropriateAvoid unnecessarily pulling huge datasets into Python when the database/warehouse can efficiently perform the operation.
+20. Partition large datasets intelligentlyPartitioning can dramatically reduce the amount of data that needs to be scanned.
+21. Choose appropriate data formatsFor analytical workloads, columnar formats such as Parquet are often preferable to row-oriented formats like CSV.
+22. Don't use Python for everythingLet SQL databases/warehouses do database operations, Spark do distributed processing, and Python handle tasks where Python is appropriate.
+23. Control schema evolutionColumns get added, removed, renamed, and data types change. Pipelines should handle schema changes deliberately.
+24. Design for backfillingYou should be able to reprocess historical data when business logic changes or historical data needs correction.
+25. Keep pipelines restartableIf a pipeline fails halfway through, you shouldn't necessarily have to start everything from scratch.
+26. Use checkpoints/state where necessaryStore enough information to know what has already been processed.
+27. Don't lose information unnecessarilyTransform data only when there's a reason. Premature aggregation or filtering can make future analysis impossible.
+28. Maintain data freshness expectationsDefine whether data needs to be real-time, near-real-time, hourly, daily, etc.
+29. Treat time carefullyTime zones, daylight saving changes, event time vs processing time, and timestamps are common sources of subtle errors.
+30. Use UTC internally where appropriateStore timestamps consistently and convert to local time at the presentation/business layer when appropriate.
+31. Design security into the pipelineProtect credentials, encrypt sensitive data, control access, and avoid unnecessarily exposing PII.
+32. Follow least-privilege accessA pipeline should have only the permissions it actually needs.
+33. Never hard-code secretsAPI keys, passwords, tokens, and credentials should come from secure secret/configuration management.
+34. Make configuration separate from codeEnvironment-specific values such as bucket names, database connections, and API endpoints shouldn't require rewriting application logic.
+35. Log meaningful informationLogs should help you understand what happened without exposing sensitive data.
+36. Alert on actionable failuresDon't create alerts for every minor anomaly. Alerts should tell someone when action is actually required.
+37. Test data pipelines like softwareUnit tests, integration tests, data-quality tests, and end-to-end tests all have different purposes.
+38. Test edge cases, not just happy pathsEmpty files, nulls, duplicates, malformed records, late data, schema changes, and API failures should be considered.
+39. Version your code and data transformationsYou should know exactly which version of transformation logic produced a dataset.
+40. Document assumptionsA data engineer should document things like:"90-day inactivity means strictly more than 90 days"rather than leaving such business definitions implicit.
+41. Make business definitions explicit"Customer", "active user", "revenue", "order", and "churn" can have multiple meanings. Define them.
+42. Don't confuse technical correctness with business correctnessA pipeline can execute perfectly and still calculate the wrong business metric.
+43. Prefer simple, understandable pipelinesComplexity is a maintenance cost.
+44. Automate repetitive operational workScheduling, testing, deployment, monitoring, retries, and data-quality checks should be automated where practical.
+45. Use retries carefullyRetry transient failures, but don't blindly retry permanent failures or operations that aren't safe to repeat.
+46. Understand exactly-once vs at-least-once vs at-most-once processingKnow what delivery/processing guarantee your system actually provides rather than assuming "exactly once."
+47. Optimize after measuringDon't optimize based on intuition alone. Measure runtime, query plans, storage, memory, network traffic, and cost.
+48. Treat cost as an engineering constraintA technically elegant pipeline that unnecessarily costs 10× more is not necessarily a good production solution.
+49. Design for auditabilityFor important data, you should be able to determine what happened, when, where the data came from, and which logic processed it.
+50. Build systems that can be understood by the next engineerGood data engineering isn't just about making pipelines work; it's about making them maintainable.
+
+
+
+
+Data Engineering Principles
+          │
+          ├── Validate early
+          │       ↓
+          │    Pydantic
+          │
+          ├── Design for failure
+          │       ↓
+          │    retries / error handling
+          │
+          ├── Process concurrently
+          │       ↓
+          │    Async Python
+          │
+          ├── Make data observable
+          │       ↓
+          │    logging / monitoring
+          │
+          ├── Process incrementally
+          │       ↓
+          │    CDC / watermarks
+          │
+          ├── Preserve raw data
+          │       ↓
+          │    S3 / data lake
+          │
+          └── Process efficiently
+                  ↓
+             SQL / Spark / Snowflake
+
+This is the layer I'd focus on alongside your tool learning. Tools change — today it may be Snowflake + Databricks + AWS; tomorrow it could be something else. These principles remain largely applicable.
